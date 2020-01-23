@@ -9,9 +9,13 @@ function Get-GitBranches {
         [Alias("Repo")]
         [ValidateNotNullOrEmpty()]
         [String]$RepositoryPath,
-        [Switch]$Remote
+        [Switch]$Remote,
+        [switch]$All
     )
     Process {
+        if ($Remote -and $All) {
+            throw "Choose either -Remote or -All"
+        }
         if (!(Test-Path $RepositoryPath -Type Container)) {
             throw "$RepositoryPath is not a valid path"
             return @()
@@ -25,8 +29,9 @@ function Get-GitBranches {
         }
         if ($Remote) {
             $Branches = (git branch -r --no-color --no-merged)
-        }
-        else {
+        } elseif($All) {
+            $Branches = (git branch -a --no-color --no-merged)
+        } else {
             $Branches = (git branch --no-color --no-merged)
         }
         Pop-Location
